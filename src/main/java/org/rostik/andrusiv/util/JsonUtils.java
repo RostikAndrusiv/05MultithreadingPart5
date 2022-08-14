@@ -3,12 +3,14 @@ package org.rostik.andrusiv.util;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
 import java.nio.charset.Charset;
 import java.util.Optional;
 
+@Slf4j
 public class JsonUtils {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
@@ -32,7 +34,7 @@ public class JsonUtils {
         try (FileInputStream fis = new FileInputStream(location)) {
             return fromJson(fis, type);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.info("File not found");
         }
         return Optional.empty();
     }
@@ -60,8 +62,6 @@ public class JsonUtils {
         if (type != null && !StringUtils.isEmpty(json)) {
             try {
                 return OBJECT_MAPPER.readValue(json, type);
-            } catch (JsonMappingException e) {
-                e.printStackTrace();
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
             }

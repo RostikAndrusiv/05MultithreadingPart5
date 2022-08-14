@@ -1,6 +1,5 @@
 package org.rostik.andrusiv.dao;
 
-import org.rostik.andrusiv.entity.Account;
 import org.rostik.andrusiv.entity.CurrencyExchange;
 
 import java.util.Optional;
