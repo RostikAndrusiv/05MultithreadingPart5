@@ -2,163 +2,87 @@ package org.rostik.andrusiv;
 
 import static org.junit.Assert.assertTrue;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.rostik.andrusiv.entity.CurrencyExchange;
-import org.rostik.andrusiv.service.AccountServiceCas;
+import org.rostik.andrusiv.exception.AccountModifiedException;
+import org.rostik.andrusiv.service.AccountService;
 import org.rostik.andrusiv.service.CurrencyExchangeService;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
+@Slf4j
 public class AppTest {
+    private static final AccountService accountService = new AccountService();
 
-    private final AccountServiceCas accountService = new AccountServiceCas();
+    private static final CurrencyExchangeService currencyExchangeService = new CurrencyExchangeService();
 
-    private final CurrencyExchangeService currencyExchangeService = new CurrencyExchangeService();
+    private static final CountDownLatch countDownLatch = new CountDownLatch(3);
 
-    private static final CountDownLatch countDownLatch = new CountDownLatch(15);
+    private static final CurrencyExchange currencyExchange = currencyExchangeService.loadCurrencyExchange("UAH_USD");
 
-    @Test
+
+
+
+    @Test(expected = AccountModifiedException.class)
     public void exchangeTest() throws InterruptedException {
         CurrencyExchange currencyExchange = currencyExchangeService.loadCurrencyExchange("UAH_USD");
 
-        Thread thread1 = new Thread(() -> {
-            try {
-                accountService.exchange("aaaa", currencyExchange, BigDecimal.valueOf(1),3);
-                countDownLatch.countDown();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-
-        Thread thread2 = new Thread(() -> {
-            try {
-                accountService.exchange("aaaa", currencyExchange, BigDecimal.valueOf(1),3);
-                countDownLatch.countDown();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-        Thread thread3 = new Thread(() -> {
-            try {
-                accountService.exchange("aaaa", currencyExchange, BigDecimal.valueOf(1),3);
-                countDownLatch.countDown();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-        Thread thread4 = new Thread(() -> {
-            try {
-                accountService.exchange("aaaa", currencyExchange, BigDecimal.valueOf(1),3);
-                countDownLatch.countDown();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-        Thread thread5 = new Thread(() -> {
-            try {
-                accountService.exchange("aaaa", currencyExchange, BigDecimal.valueOf(1),3);
-                countDownLatch.countDown();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-        Thread thread6 = new Thread(() -> {
-            try {
-                accountService.exchange("aaaa", currencyExchange, BigDecimal.valueOf(1),3);
-                countDownLatch.countDown();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-        Thread thread7 = new Thread(() -> {
-            try {
-                accountService.exchange("aaaa", currencyExchange, BigDecimal.valueOf(1),3);
-                countDownLatch.countDown();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-        Thread thread8 = new Thread(() -> {
-            try {
-                accountService.exchange("aaaa", currencyExchange, BigDecimal.valueOf(1),3);
-                countDownLatch.countDown();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-        Thread thread9 = new Thread(() -> {
-            try {
-                accountService.exchange("aaaa", currencyExchange, BigDecimal.valueOf(1),3);
-                countDownLatch.countDown();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-        Thread thread10 = new Thread(() -> {
-            try {
-                accountService.exchange("aaaa", currencyExchange, BigDecimal.valueOf(1),3);
-                countDownLatch.countDown();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-        Thread thread11 = new Thread(() -> {
-            try {
-                accountService.exchange("aaaa", currencyExchange, BigDecimal.valueOf(1),3);
-                countDownLatch.countDown();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-        Thread thread12 = new Thread(() -> {
-            try {
-                accountService.exchange("aaaa", currencyExchange, BigDecimal.valueOf(1),3);
-                countDownLatch.countDown();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-        Thread thread13 = new Thread(() -> {
-            try {
-                accountService.exchange("aaaa", currencyExchange, BigDecimal.valueOf(1),3);
-                countDownLatch.countDown();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-        Thread thread14 = new Thread(() -> {
-            try {
-                accountService.exchange("aaaa", currencyExchange, BigDecimal.valueOf(1),3);
-                countDownLatch.countDown();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-        Thread thread15 = new Thread(() -> {
-            try {
-                accountService.exchange("aaaa", currencyExchange, BigDecimal.valueOf(1),3);
-                countDownLatch.countDown();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-
-        thread1.start();
-        thread2.start();
-        thread3.start();
-        thread4.start();
-        thread5.start();
-        thread6.start();
-        thread7.start();
-        thread8.start();
-        thread9.start();
-        thread10.start();
-        thread11.start();
-        thread12.start();
-        thread13.start();
-        thread14.start();
-        thread15.start();
+        List<Runnable> taskList = new ArrayList<>();
+        for (int i = 0; i < 15; i++) {
+            taskList.add(()-> createTask());
+        }
+        ExecutorService service = Executors.newFixedThreadPool(15);
+        for (Runnable task: taskList) {
+            service.execute(task);
+        }
+        taskList.add(()-> createTask());
+        System.out.println(Thread.currentThread().getState());
         countDownLatch.await();
+        System.out.println(Thread.currentThread().getState());
+        Thread.sleep(15_000);
+        System.out.println(Thread.currentThread().getState());
+        shutdownAndAwaitTermination(service);
+        System.out.println(Thread.currentThread().getState());
+
+    }
+
+    private static void createTask() {
+        try {
+            log.info(Thread.currentThread().getName() + "Exchange test start.....");
+            accountService.exchange("aaaa", currencyExchange, BigDecimal.valueOf(1),3);
+            countDownLatch.countDown();
+            log.info(Thread.currentThread().getName() + "Exchange test end.....");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    private void shutdownAndAwaitTermination(ExecutorService pool) {
+        // Disable new tasks from being submitted
+        pool.shutdown();
+        try {
+            // Wait a while for existing tasks to terminate
+            if (!pool.awaitTermination(15, TimeUnit.SECONDS)) {
+                // Cancel currently executing tasks forcefully
+                pool.shutdownNow();
+                // Wait a while for tasks to respond to being cancelled
+                if (!pool.awaitTermination(15, TimeUnit.SECONDS))
+                    System.err.println("Pool did not terminate");
+            }
+        } catch (InterruptedException ex) {
+            // (Re-)Cancel if current thread also interrupted
+            pool.shutdownNow();
+            // Preserve interrupt status
+            Thread.currentThread().interrupt();
+        }
     }
 }

@@ -1,7 +1,7 @@
 package org.rostik.andrusiv.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.rostik.andrusiv.dao.AccountDaoCas;
+import org.rostik.andrusiv.dao.AccountDao;
 import org.rostik.andrusiv.entity.Account;
 import org.rostik.andrusiv.entity.Currency;
 import org.rostik.andrusiv.entity.CurrencyExchange;
@@ -14,9 +14,9 @@ import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @Slf4j
-public class AccountServiceCas {
+public class AccountService {
 
-    private static final AccountDaoCas dao = new AccountDaoCas();
+    private static final AccountDao dao = new AccountDao();
 
     public Account createAccount(String name) {
         Account acc = new Account(name);
@@ -40,7 +40,10 @@ public class AccountServiceCas {
             if (retries > 0) {
                 log.info(String.format("%s : retrying... retries left: %s ", Thread.currentThread().getName(), retries));
                 addCurrency(name, currencyType, currencyValue, retries - 1);
-            } else log.info(String.format("%s : account %s was not updated", Thread.currentThread().getName(), name));
+            } else{
+                log.info(String.format("%s : account %s was not updated", Thread.currentThread().getName(), name));
+                throw new AccountModifiedException(String.format("%s : account %s was not updated", Thread.currentThread().getName(), name), ex);
+            }
         }
 
         return account;
@@ -60,7 +63,10 @@ public class AccountServiceCas {
             if (retries > 0) {
                 log.info(String.format("%s : retrying... retries left: %s ", Thread.currentThread().getName(), retries));
                 exchange(name, currencyExchange, amount, retries - 1);
-            } else log.info(String.format("%s : account %s was not updated", Thread.currentThread().getName(), name));
+            } else {
+                log.info(String.format("%s : account %s was not updated", Thread.currentThread().getName(), name));
+                throw new AccountModifiedException(String.format("%s : account %s was not updated", Thread.currentThread().getName(), name), ex);
+            }
         }
         return account;
     }

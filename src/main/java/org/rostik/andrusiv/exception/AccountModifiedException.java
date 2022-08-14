@@ -11,4 +11,8 @@ public class AccountModifiedException extends RuntimeException{
     public AccountModifiedException(String message){
         super(message);
     }
+
+    public AccountModifiedException(String message, Throwable cause){
+        super(message, cause);
+    }
 }

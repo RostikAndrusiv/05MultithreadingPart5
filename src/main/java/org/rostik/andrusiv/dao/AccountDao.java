@@ -17,8 +17,9 @@ import static org.rostik.andrusiv.util.JsonUtils.saveJsonToFile;
 
 
 @Slf4j
-public class AccountDaoCas {
+public class AccountDao {
 
+    //TODO regular hashMap if keys contains threadname???
     private final Map<String, Account> accountsCache = new ConcurrentHashMap<>();
     private final Gson gson = new Gson();
     private final Lock lock = new ReentrantLock();
@@ -28,11 +29,11 @@ public class AccountDaoCas {
         String cacheKey = Thread.currentThread().getName() + "accountName";
         String location = buildPathForSave(account);
         lock.lock();
+        try {
         if (!enableCas) {
             saveJsonToFile(account, location);
             return true;
         }
-        try {
             readJsonFromFile(location, Account.class).ifPresent(acc -> {
                 if (accountsCache.containsKey(cacheKey) && !acc.equals(accountsCache.get(cacheKey))) {
                     log.info(String.format("%s: Account %s was modified", Thread.currentThread().getName(), accountName));
