@@ -1,6 +1,8 @@
 package org.rostik.andrusiv;
 
 import static org.junit.Assert.assertTrue;
+import static org.rostik.andrusiv.entity.CurrencyType.*;
+import static org.rostik.andrusiv.entity.CurrencyType.UAH;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
@@ -27,12 +29,14 @@ public class AppTest {
 
     private static final CurrencyExchange currencyExchange = currencyExchangeService.loadCurrencyExchange("UAH_USD");
 
-
-
-
     @Test(expected = AccountModifiedException.class)
     public void exchangeTest() throws InterruptedException {
-        CurrencyExchange currencyExchange = currencyExchangeService.loadCurrencyExchange("UAH_USD");
+        CurrencyExchange currencyExchange = new CurrencyExchange(UAH, USD, BigDecimal.valueOf(0.15));
+        CurrencyExchange currencyExchange1 = new CurrencyExchange(UAH, EUR, BigDecimal.valueOf(0.2));
+        currencyExchangeService.createCurrencyExchange(currencyExchange);
+        currencyExchangeService.createCurrencyExchange(currencyExchange1);
+        accountService.createAccount("aaaa");
+        accountService.addCurrency("aaaa", UAH, BigDecimal.valueOf(1000), 3);
 
         List<Runnable> taskList = new ArrayList<>();
         for (int i = 0; i < 15; i++) {
@@ -42,15 +46,12 @@ public class AppTest {
         for (Runnable task: taskList) {
             service.execute(task);
         }
-        taskList.add(()-> createTask());
         System.out.println(Thread.currentThread().getState());
         countDownLatch.await();
         System.out.println(Thread.currentThread().getState());
         Thread.sleep(15_000);
         System.out.println(Thread.currentThread().getState());
         shutdownAndAwaitTermination(service);
-        System.out.println(Thread.currentThread().getState());
-
     }
 
     private static void createTask() {
