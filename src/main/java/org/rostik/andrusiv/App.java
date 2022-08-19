@@ -19,8 +19,8 @@ public class App {
         CurrencyExchange currencyExchange1 = new CurrencyExchange(UAH, EUR, BigDecimal.valueOf(0.2));
         currencyExchangeService.createCurrencyExchange(currencyExchange);
         currencyExchangeService.createCurrencyExchange(currencyExchange1);
-        service.createAccount("aaaa");
-        service.addCurrency("aaaa", UAH, BigDecimal.valueOf(1000), 3);
-        service.exchange("aaaa", currencyExchange, BigDecimal.valueOf(15), 3);
+        service.createAccount("test");
+        service.addCurrency("test", UAH, BigDecimal.valueOf(1000), 3);
+        service.exchange("test", currencyExchange, BigDecimal.valueOf(1), 3);
     }
 }

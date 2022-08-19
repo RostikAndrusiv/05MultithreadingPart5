@@ -14,7 +14,7 @@ import java.util.Optional;
 @NoArgsConstructor
 public class CurrencyExchangeService {
 
-    private static final CurrencyExchangeDao dao = new CurrencyExchangeDao();
+    private CurrencyExchangeDao currencyExchangeDao = new CurrencyExchangeDao();
 
     public CurrencyExchange createCurrencyExchange(CurrencyExchange currencyExchange) {
         if (currencyExchange == null) {
@@ -29,7 +29,7 @@ public class CurrencyExchangeService {
         }
 
         CurrencyExchange exchange = new CurrencyExchange(from, to, exchangeRate);
-        dao.save(exchange);
+        currencyExchangeDao.save(exchange);
         return exchange;
     }
 
@@ -37,7 +37,7 @@ public class CurrencyExchangeService {
         if (ObjectUtils.isEmpty(name)) {
             throw new IllegalArgumentException("Arguments should be not null");
         }
-        CurrencyExchange exchange = dao.load(name).orElseThrow(() -> new RuntimeException("no currencyExchange fonund with name: " + name));
+        CurrencyExchange exchange = currencyExchangeDao.load(name).orElseThrow(() -> new RuntimeException("no currencyExchange fonund with name: " + name));
         return exchange;
     }
 }

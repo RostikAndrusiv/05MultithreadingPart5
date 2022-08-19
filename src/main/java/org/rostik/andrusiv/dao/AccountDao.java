@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.rostik.andrusiv.entity.Account;
 import org.rostik.andrusiv.exception.AccountModifiedException;
 
-import java.io.PrintStream;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,6 +18,8 @@ import static org.rostik.andrusiv.util.JsonUtils.saveJsonToFile;
 @Slf4j
 public class AccountDao {
 
+    private String baseDir = "c:/";
+
     //TODO regular hashMap if keys contains threadname???
     private final Map<String, Account> accountsCache = new ConcurrentHashMap<>();
     private final Gson gson = new Gson();
@@ -30,10 +31,10 @@ public class AccountDao {
         String location = buildPathForSave(account);
         lock.lock();
         try {
-        if (!enableCas) {
-            saveJsonToFile(account, location);
-            return true;
-        }
+            if (!enableCas) {
+                saveJsonToFile(account, location);
+                return true;
+            }
             readJsonFromFile(location, Account.class).ifPresent(acc -> {
                 if (accountsCache.containsKey(cacheKey) && !acc.equals(accountsCache.get(cacheKey))) {
                     log.info(String.format("%s: Account %s was modified", Thread.currentThread().getName(), accountName));
@@ -67,11 +68,10 @@ public class AccountDao {
     }
 
     private String buildPathForSave(Account account) {
-        return "c:/exchange-service/accounts/" + account.getName() + ".json";
+        return baseDir + "exchange-service/accounts/" + account.getName() + ".json";
     }
 
     private String buildPathForLoad(String accountName) {
-        return "c:/exchange-service/accounts/" + accountName + ".json";
+        return baseDir + "exchange-service/accounts/" + accountName + ".json";
     }
-
 }
